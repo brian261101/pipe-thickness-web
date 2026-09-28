@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tính chiều dày thành ống &amp; chọn ống — ASME B31.3 / B31.1 / B31.8</title>
+<meta name="description" content="Công cụ web tính chiều dày thành ống theo ASME B31.3, B31.1, B31.8 và sàng lọc vật liệu ống theo lưu chất và nhiệt độ. Chạy hoàn toàn trong trình duyệt.">
+<meta name="theme-color" content="#0a0f1c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0f1c'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%234fb3d9' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='none' stroke='%23f5a524' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="16" cy="16" r="5.5" fill="none" stroke="#4fb3d9" stroke-width="2"/>
+    </svg>
+    <div>Chiều dày thành ống<small>ASME B31.3 / B31.1 / B31.8 · chọn ống theo lưu chất</small></div>
+  </div>
+  <div class="spacer"></div>
+  <button id="btn-verify" class="ghost">Tự kiểm chứng</button>
+  <button id="btn-export" class="ghost">Xuất thư viện</button>
+  <button id="btn-pdf" class="ghost">Xuất PDF</button>
+  <button id="btn-report" class="ghost">Tải báo cáo</button>
+  <button id="btn-run" class="primary" disabled>TÍNH</button>
+</header>
+
+<div class="wrap one">
+  <div class="tabs" id="tabs">
+    <button data-p="p1" class="on">1· Điều kiện thiết kế</button>
+    <button data-p="p2">2· Lưu chất &amp; vật liệu</button>
+    <button data-p="p3">3· Kết quả</button>
+    <button data-p="p4">4· Thư viện ứng suất S</button>
+    <button data-p="p5">5· Báo cáo</button>
+  </div>
+
+  <!-- ---- 1 ---- -->
+  <section class="pane on" id="p1">
+    <div class="card" id="card-code">
+      <h3>Bước 1 — Chọn bộ tiêu chuẩn thiết kế</h3>
+      <p class="note">Phải chọn trước khi tính. Mỗi bộ tiêu chuẩn dùng phương trình
+        khác nhau và đòi hỏi bộ hệ số khác nhau — B31.3 dùng ứng suất cho phép S của
+        Bảng A-1, còn B31.8 dùng SMYS cùng hệ số Class Location.</p>
+      <select id="code"></select>
+      <div class="eqbox" id="eqbox"></div>
+    </div>
+
+    <div class="card">
+      <h3>Bước 2 — Điều kiện thiết kế</h3>
+      <div class="grid">
+        <div><label class="f">Áp suất thiết kế P [MPa]</label><input id="P" value="1.0"></div>
+        <div><label class="f">Nhiệt độ thiết kế T [°C]</label><input id="T" value="-162"></div>
+        <div><label class="f">Dư ăn mòn / ren c [mm]</label><input id="c" value="2.0"></div>
+        <div><label class="f">Dung sai chế tạo</label><select id="tolsel"></select></div>
+        <div><label class="f">Dung sai [%]</label><input id="tol" value="12.5"></div>
+        <div><label class="f">Chiều dày tối thiểu kết cấu [mm]</label><input id="structmin" value="0"></div>
+      </div>
+      <p class="note">c gồm dư ăn mòn, chiều sâu ren và rãnh — ASME B31.3 §304.1.1 (a),
+        §302.4. Chiều dày tối thiểu kết cấu là yêu cầu riêng của dự án (nếu có), để 0 nếu không dùng.</p>
+    </div>
+
+    <div class="card">
+      <h3>Bước 3 — Hệ số</h3>
+      <div class="grid">
+        <div><label class="f">E — hệ số chất lượng mối nối</label><input id="E" value="1.0"></div>
+        <div><label class="f">W — hệ số giảm bền mối hàn</label><input id="W" value="1.0"></div>
+        <div><label class="f">Y — hệ số vật liệu</label><input id="Y" value="0.4"></div>
+        <div id="wrap-F" style="display:none"><label class="f">F — hệ số Class Location</label><select id="F"></select></div>
+        <div id="wrap-Tf" style="display:none"><label class="f">T — hệ số giảm nhiệt độ</label><input id="Tf" value="1.0"></div>
+      </div>
+      <p class="note" id="ynote"></p>
+      <p class="note">E lấy theo B31.3 Bảng A-1A / A-1B (ống đúc E = 1,0; ống hàn thấp hơn).
+        W theo Bảng 302.3.5, bằng 1,0 dưới 427 °C.</p>
+    </div>
+
+    <div class="card">
+      <h3>Khung tên hồ sơ (in ra PDF)</h3>
+      <div class="grid">
+        <div><label class="f">Công trình</label><input id="m-project" value="HỆ THỐNG CẤP KHÍ LNG"></div>
+        <div><label class="f">Hạng mục</label><input id="m-item" value="Đường ống công nghệ"></div>
+        <div><label class="f">Chủ đầu tư / khách hàng</label><input id="m-client" value=""></div>
+        <div><label class="f">Đơn vị thiết kế</label><input id="m-company" value=""></div>
+        <div><label class="f">Số tài liệu</label><input id="m-docno" value="CAL-001"></div>
+        <div><label class="f">Rev</label><input id="m-rev" value="0"></div>
+        <div><label class="f">Ngày</label><input id="m-date" value=""></div>
+        <div><label class="f">Người lập</label><input id="m-by" value=""></div>
+        <div><label class="f">Kiểm tra</label><input id="m-checked" value=""></div>
+        <div><label class="f">Phê duyệt</label><input id="m-approved" value=""></div>
+      </div>
+      <p class="note">Các ô này chỉ xuất hiện trên bản PDF in ra.</p>
+    </div>
+
+    <div class="card">
+      <h3>Bước 4 — Dải kích cỡ cần tính</h3>
+      <div class="grid">
+        <div><label class="f">Từ NPS</label><select id="npsFrom"></select></div>
+        <div><label class="f">Đến NPS</label><select id="npsTo"></select></div>
+        <div><label class="f">Schedule</label>
+          <select id="schedmode">
+            <option value="">Tự chọn nhẹ nhất còn đạt</option>
+          </select></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- 2 ---- -->
+  <section class="pane" id="p2">
+    <div class="card">
+      <h3>Lưu chất</h3>
+      <div class="grid">
+        <div style="grid-column:1/-1"><label class="f">Loại lưu chất</label><select id="fluid"></select></div>
+      </div>
+      <p class="note" id="fluid-note"></p>
+      <button id="btn-usetemp" class="tiny ghost" style="margin-top:8px">Dùng nhiệt độ điển hình của lưu chất này</button>
+    </div>
+
+    <div class="card">
+      <h3>Vật liệu ống</h3>
+      <select id="mat"></select>
+      <p class="srcline" id="mat-src"></p>
+      <div class="kpi" id="mat-kpi"></div>
+    </div>
+
+    <div class="card">
+      <h3>Sàng lọc vật liệu theo lưu chất và nhiệt độ</h3>
+      <p class="note">Xếp theo mức phù hợp ở nhiệt độ thiết kế hiện tại. Đây là bước
+        SÀNG LỌC — quyết định cuối cùng phải tra tiêu chuẩn và spec dự án.</p>
+      <div id="screen"></div>
+    </div>
+  </section>
+
+  <!-- ---- 3 ---- -->
+  <section class="pane" id="p3">
+    <div class="card">
+      <div class="verdict" id="verdict">Chưa tính.</div>
+      <div class="sub" id="verdict-sub"></div>
+      <div class="kpi" id="kpi"></div>
+    </div>
+    <div class="card">
+      <h3>Bảng tính theo kích cỡ</h3>
+      <div class="scrollx">
+        <table class="rtbl" id="res">
+          <thead><tr>
+            <th>NPS</th><th>DN</th><th>D₀ [mm]</th><th>t [mm]</th><th>tₘ=t+c [mm]</th>
+            <th>Đặt hàng ≥</th><th>Schedule</th><th>T_nom</th><th>T′</th>
+            <th>Dư [mm]</th><th>MAWP [MPa]</th><th>Kết quả</th><th>t&lt;D₀/6</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Cảnh báo &amp; ghi chú</h3>
+      <div id="warns"></div>
+    </div>
+  </section>
+
+  <!-- ---- 4 ---- -->
+  <section class="pane" id="p4">
+    <div class="banner" id="libbanner"></div>
+    <div class="card">
+      <h3>Thư viện ứng suất cho phép</h3>
+      <p class="note">Mỗi vật liệu có một danh sách điểm <code>nhiệt độ : S</code>.
+        Công cụ nội suy tuyến tính giữa các điểm và <b>từ chối tính</b> nếu chưa có S.
+        Nhập một lần rồi bấm <em>Xuất thư viện</em> để dùng chung trong công ty.</p>
+      <div id="lib"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button id="btn-import" class="ghost">Nhập thư viện từ JSON…</button>
+        <input type="file" id="file-import" accept=".json" style="display:none">
+        <button id="btn-reset" class="ghost">Khôi phục mặc định</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---- 5 ---- -->
+  <section class="pane" id="p5">
+    <div class="card">
+      <h3>Báo cáo tính toán</h3>
+      <pre class="report" id="report">Bấm TÍNH để tạo báo cáo.</pre>
+    </div>
+  </section>
+</div>
+
+<footer>
+  Công cụ <strong>sàng lọc và định cỡ sơ bộ</strong>. Chỉ tính chiều dày chịu áp suất
+  bên trong — chưa xét áp suất ngoài/chân không, tải trọng bền vững và tải thỉnh thoảng
+  (§302.3, §304.1.1), ứng suất do giãn nở nhiệt, mỏi, và các bộ phận đặc biệt (chỗ rẽ
+  nhánh, co, giảm). Ứng suất cho phép S do người dùng nhập từ ASME B31.3 Bảng A-1.
+  Hồ sơ phát hành phải được kỹ sư có thẩm quyền kiểm tra độc lập.
+  Toàn bộ tính toán chạy trong trình duyệt — không có dữ liệu nào được gửi đi.
+</footer>
+
+<div id="sheet"></div>
+
+<dialog id="dlg">
+  <div class="dlg-head"><span id="dlg-title">…</span><span class="spacer"></span>
+    <button class="tiny ghost" onclick="document.getElementById('dlg').close()">Đóng</button>
+  </div>
+  <div class="dlg-body" id="dlg-body"></div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/materials.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/select.js"></script>
+<script src="js/verify.js"></script>
+<script src="js/report.js"></script>
+<script src="js/sheet.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
