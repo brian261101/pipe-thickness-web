@@ -25,6 +25,7 @@
   <div class="spacer"></div>
   <button id="btn-verify" class="ghost">Tự kiểm chứng</button>
   <button id="btn-export" class="ghost">Xuất thư viện</button>
+  <button id="btn-xlsx" class="ghost">Xuất Excel</button>
   <button id="btn-pdf" class="ghost">Xuất PDF</button>
   <button id="btn-report" class="ghost">Tải báo cáo</button>
   <button id="btn-run" class="primary" disabled>TÍNH</button>
@@ -83,8 +84,6 @@
       <div class="grid">
         <div><label class="f">Công trình</label><input id="m-project" value="HỆ THỐNG CẤP KHÍ LNG"></div>
         <div><label class="f">Hạng mục</label><input id="m-item" value="Đường ống công nghệ"></div>
-        <div><label class="f">Chủ đầu tư / khách hàng</label><input id="m-client" value=""></div>
-        <div><label class="f">Đơn vị thiết kế</label><input id="m-company" value=""></div>
         <div><label class="f">Số tài liệu</label><input id="m-docno" value="CAL-001"></div>
         <div><label class="f">Rev</label><input id="m-rev" value="0"></div>
         <div><label class="f">Ngày</label><input id="m-date" value=""></div>
@@ -92,7 +91,7 @@
         <div><label class="f">Kiểm tra</label><input id="m-checked" value=""></div>
         <div><label class="f">Phê duyệt</label><input id="m-approved" value=""></div>
       </div>
-      <p class="note">Các ô này chỉ xuất hiện trên bản PDF in ra.</p>
+      <p class="note">Các ô này xuất hiện trên bản PDF và bản Excel. Bản Excel chừa sẵn hai ô trống có viền ở hai đầu khung tên để bạn tự chèn logo công ty (Insert &gt; Pictures).</p>
     </div>
 
     <div class="card">
@@ -212,6 +211,8 @@
 <script src="js/verify.js"></script>
 <script src="js/report.js"></script>
 <script src="js/sheet.js"></script>
+<script src="js/xlsx.js"></script>
+<script src="js/excel.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -135,7 +135,7 @@
      và bộ hệ số khác nhau, tính trước khi chọn là vô nghĩa. */
   function applyGate() {
     const ok = codeChosen();
-    for (const id of ['btn-run', 'btn-pdf', 'btn-report']) $(id).disabled = !ok;
+    for (const id of ['btn-run', 'btn-pdf', 'btn-xlsx', 'btn-report']) $(id).disabled = !ok;
     for (const el of document.querySelectorAll(
         '#p1 .card:not(#card-code), #p2, #p3, #p5')) {
       el.classList.toggle('locked', !ok);
@@ -439,18 +439,36 @@
   }
 
   /* ---------------- xuất PDF ---------------- */
-  const META_IDS = ['m-project', 'm-item', 'm-client', 'm-company', 'm-docno',
+  const META_IDS = ['m-project', 'm-item', 'm-docno',
                     'm-rev', 'm-date', 'm-by', 'm-checked', 'm-approved'];
   function meta() {
     return {
       project: $('m-project').value, item: $('m-item').value,
-      client: $('m-client').value, company: $('m-company').value,
       docNo: $('m-docno').value, rev: $('m-rev').value,
       date: $('m-date').value || new Date().toLocaleDateString('vi-VN'),
       by: $('m-by').value, checked: $('m-checked').value,
       approved: $('m-approved').value
     };
   }
+  function exportExcel() {
+    if (!lastRows) { toast('Bấm TÍNH trước đã.'); return; }
+    let bytes;
+    try {
+      bytes = P.excel.build(meta(), lastCtx, lastRows, lastWarns);
+    } catch (exc) {
+      errDlg('Không tạo được file Excel', exc.message);
+      return;
+    }
+    const name = (meta().docNo || 'tinh_toan_chieu_day_ong')
+      .replace(/[\\/:*?"<>|]/g, '-') + '.xlsx';
+    const b = new Blob([bytes], { type:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = el('a', { href: URL.createObjectURL(b), download: name });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast('Đã tải ' + name);
+  }
+
   function exportPDF() {
     if (!lastRows) { toast('Bấm TÍNH trước đã.'); return; }
     $('sheet').innerHTML = P.sheet.build(meta(), lastCtx, lastRows, lastWarns);
@@ -551,6 +569,7 @@
     $('btn-verify').onclick = runVerify;
     $('btn-export').onclick = exportLib;
     $('btn-pdf').onclick = exportPDF;
+    $('btn-xlsx').onclick = exportExcel;
     $('btn-report').onclick = () => {
       if (!lastRows) { toast('Bấm TÍNH trước đã.'); return; }
       dl('tinh_toan_chieu_day_ong.txt', $('report').textContent);

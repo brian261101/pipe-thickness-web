@@ -20,12 +20,11 @@
   function build(meta, ctx, rows, warns) {
     const h = [];
 
+    // Khung tên chỉ còn phần tiêu đề: tên công ty bỏ đi, logo thêm ở bản Excel.
     h.push('<div class="sh-title">');
     h.push('<table class="sh-tb"><tr>');
-    h.push('<td class="l">' + esc(meta.client || '') + '</td>');
     h.push('<td class="c"><div class="t1">' + esc(meta.project || '') + '</div>' +
            '<div class="t2">TÍNH TOÁN CHIỀU DÀY THÀNH ỐNG</div></td>');
-    h.push('<td class="r">' + esc(meta.company || '') + '</td>');
     h.push('</tr></table></div>');
 
     h.push('<table class="sh-meta"><tr>' +
